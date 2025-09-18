@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, DateTime
 from datetime import datetime
-from backend.src.database import Base
+from database import Base
 
 class Photo(Base):
     __tablename__ = "photos"

@@ -4,9 +4,9 @@ from sqlalchemy.orm import Session
 from sqlalchemy import asc, desc
 import shutil, os
 
-from backend.src.database import Base, engine, SessionLocal
-from backend.src.models import Photo
-from backend.src.tasks import process_image
+from database import Base, engine, SessionLocal
+from models import Photo
+from tasks import process_image
 
 UPLOAD_DIR = os.path.join(os.getcwd(), "uploads")
 os.makedirs(UPLOAD_DIR, exist_ok=True)
