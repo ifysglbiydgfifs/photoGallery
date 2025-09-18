@@ -1,0 +1,57 @@
+version: "3.9"
+
+services:
+  backend:
+    build: ./backend
+    container_name: photogallary-backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./uploads:/uploads
+    environment:
+      - REDIS_HOST=redis
+      - POSTGRES_HOST=db
+      - POSTGRES_DB=photogallary
+      - POSTGRES_USER=pguser
+      - POSTGRES_PASSWORD=pgpassword
+    depends_on:
+      - redis
+      - db
+
+  worker:
+    build: ./backend
+    container_name: photogallary-worker
+    command: celery -A tasks worker --loglevel=info
+    volumes:
+      - ./uploads:/uploads
+    environment:
+      - REDIS_HOST=redis
+      - POSTGRES_HOST=db
+      - POSTGRES_DB=photogallary
+      - POSTGRES_USER=pguser
+      - POSTGRES_PASSWORD=pgpassword
+    depends_on:
+      - redis
+      - db
+
+  redis:
+    image: redis:6-alpine
+    container_name: photogallary-redis
+    ports:
+      - "6379:6379"
+
+  db:
+    image: postgres:15-alpine
+    container_name: photogallary-db
+    restart: always
+    environment:
+      POSTGRES_DB: photogallary
+      POSTGRES_USER: pguser
+      POSTGRES_PASSWORD: pgpassword
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:
