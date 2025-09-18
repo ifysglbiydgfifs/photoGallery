@@ -3,7 +3,7 @@ version: "3.9"
 services:
   backend:
     build: ./backend
-    container_name: photogallary-backend
+    container_name: photogallery-backend
     ports:
       - "8000:8000"
     volumes:
@@ -11,45 +11,57 @@ services:
     environment:
       - REDIS_HOST=redis
       - POSTGRES_HOST=db
-      - POSTGRES_DB=photogallary
-      - POSTGRES_USER=pguser
-      - POSTGRES_PASSWORD=pgpassword
+      - POSTGRES_DB=photogallery
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=123
     depends_on:
-      - redis
       - db
+      - redis
+      
 
   worker:
     build: ./backend
-    container_name: photogallary-worker
+    container_name: photogallery-worker
     command: celery -A tasks worker --loglevel=info
     volumes:
       - ./uploads:/uploads
     environment:
       - REDIS_HOST=redis
       - POSTGRES_HOST=db
-      - POSTGRES_DB=photogallary
-      - POSTGRES_USER=pguser
-      - POSTGRES_PASSWORD=pgpassword
+      - POSTGRES_DB=photogallery
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=123
     depends_on:
-      - redis
       - db
+      - redis
+      
+
+  frontend:
+    build: ./frontend
+    container_name: photogallery-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - VITE_BACKEND_URL=http://backend:8000
+    depends_on:
+      - backend
 
   redis:
     image: redis:6-alpine
-    container_name: photogallary-redis
+    container_name: photogallery-redis
     ports:
       - "6379:6379"
 
   db:
     image: postgres:15-alpine
-    container_name: photogallary-db
+    container_name: photogallery-db
     restart: always
     environment:
-      POSTGRES_DB: photogallary
-      POSTGRES_USER: pguser
-      POSTGRES_PASSWORD: pgpassword
+      POSTGRES_DB: photogallery
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123
     ports:
-      - "5432:5432"
+      - "5555:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
 
