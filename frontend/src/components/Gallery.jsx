@@ -15,8 +15,11 @@ function Gallery() {
   const [photos, setPhotos] = useState([]);
   const [file, setFile] = useState(null);
   const [sort, setSort] = useState("date");
+  // ! OBSOLETE
   const [renameId, setRenameId] = useState(null);
   const [newName, setNewName] = useState("");
+
+  const [selectedPhoto, setSelectedPhoto] = useState(null);
 
   const fetchPhotos = async () => {
     try {
@@ -52,11 +55,15 @@ function Gallery() {
   };
 
   const renamePhoto = async (id) => {
+    
+    if (selectedPhoto?.filename === newName) return;
+
     try {
-      await axios.put(`${API_URL}/photos/${id}`, null, {
+      await axios.put(`${API_URL}/photos/${id}`, id, {
         params: { new_name: newName },
       });
-      setRenameId(null);
+
+      setRenameId(id);
       setNewName("");
       fetchPhotos();
     } catch (err) {
@@ -127,7 +134,7 @@ function Gallery() {
               </a>
 
               <div className="p-4">
-                {renameId === p.id ? (
+                {selectedPhoto === p ? (
                   <div className="flex items-center gap-2">
                     <input
                       value={newName}
@@ -135,13 +142,21 @@ function Gallery() {
                       className="flex-1 border border-gray-300 dark:border-gray-600 rounded-lg px-2 py-1 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                     />
                     <button
-                      onClick={() => renamePhoto(p.id)}
+                      onClick={() => { 
+                          if (selectedPhoto.filename === newName) {
+                            setSelectedPhoto(null);
+                            return;
+                          }
+                          renamePhoto(p.id);
+                        }
+                      }
                       className="bg-green-600 text-white px-2 py-1 rounded-lg hover:bg-green-700 transition"
                     >
                       <Check size={16} />
                     </button>
                     <button
                       onClick={() => {
+                        setSelectedPhoto(null);
                         setRenameId(null);
                         setNewName("");
                       }}
@@ -158,7 +173,8 @@ function Gallery() {
                     <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition">
                       <button
                         onClick={() => {
-                          setRenameId(p.id);
+                          setSelectedPhoto(p)
+                          // setRenameId(p.id);
                           setNewName(p.filename);
                         }}
                         className="text-blue-600 hover:text-blue-800"
